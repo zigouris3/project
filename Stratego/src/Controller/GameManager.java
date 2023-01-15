@@ -8,15 +8,11 @@ public class GameManager{
     private static Board board = new Board(8, 10);;
     
     static BoardGraphics newGraphics;
-    private boolean reducedArmy;
-    private boolean noRetreat;
     private boolean isFinished;
     private String currentPlayer;
     public static GameManager gameManager;
 
     public GameManager() {
-        reducedArmy = false;
-        noRetreat = false;
         isFinished = false;
         newGraphics = new BoardGraphics(board);
         initializeGame();

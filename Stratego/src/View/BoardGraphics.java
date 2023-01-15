@@ -22,7 +22,8 @@ public class BoardGraphics extends JPanel implements MouseListener {
     private static final Color green = Color.green;
     private final int ROWS = 8; //default size
     private final int COLS = 10;
-    private int squareSize = 134; // (1080 / 80) - 1
+    
+    private int squareSize = (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight() / 80) * 10 - 1); 
     private boolean isItYellow = false; // Used to check if the color is yellow
     public Board board;
     public JLabel[][] pawns = new JLabel[ROWS][COLS];
@@ -108,7 +109,7 @@ public class BoardGraphics extends JPanel implements MouseListener {
     
     void CreateBoard() {
 
-        ArrayList<String> modifiedArrayBlue = new ArrayList<String>();
+
 
         // A nested for loop to get the rows, columns of the board
         for (int row = 0; row < ROWS; row++) {
@@ -140,9 +141,6 @@ public class BoardGraphics extends JPanel implements MouseListener {
                         e.printStackTrace();
                     }    
                     pawns[row][col].setIcon(icon);
-                    if(blueImages.length>=1){
-                    modifiedArrayBlue= new ArrayList<String>(Arrays.asList(blueImages));
-                    }
                 
                     for (int i = 0; i < blueImagesList.size(); i++) {
                         if(blueImagesList.get(i) == url) {
@@ -166,9 +164,6 @@ public class BoardGraphics extends JPanel implements MouseListener {
                         e.printStackTrace();
                     }    
                     pawns[row][col].setIcon(icon);
-                    if(redImages.length>=1){
-                    modifiedArrayBlue= new ArrayList<String>(Arrays.asList(blueImages));
-                    }
                 
                     for (int i = 0; i < redImagesList.size(); i++) {
                         if(redImagesList.get(i) == url) {
@@ -201,20 +196,13 @@ public class BoardGraphics extends JPanel implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         JLabel label = (JLabel) e.getSource();
-        System.out.println(label.getName());
-        if(label.getName().contains("Trap") || label.getName().contains("Flag")) {
-            for (int i = 0; i < ROWS; i++) {
-                for (int j = 0; j < COLS; j++) { // finding the pawn's location in the board
-                    if(pawns[i][j].getName() == "WhiteSpace" && pawns[i][j].getBackground() != yellow) {
-                        pawns[i][j].setBackground(white);
-                    }
-                }
-            }
-            return;
-        }
+
+
 
         if(currentPlayer == teamBlue) {
-            
+           
+           
+            //MAKE ENEMY HIDDEN
             for(int i = 0; i<ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if(pawns[i][j].getBackground() == red) {
@@ -229,7 +217,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     }
                 }
             }
+            
 
+
+            
+            //MAKE SELF VISIBLE
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if(pawns[i][j].getBackground() == blue) {
@@ -253,6 +245,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     }
                 }
             }
+            
+            
+            
+            
+            //IF MOVE IS MADE
             if(label.getBackground() == green) {
             
                 int row = -1;
@@ -295,11 +292,82 @@ public class BoardGraphics extends JPanel implements MouseListener {
                 
             }
 
+
+            if(label.getBackground() == orange) {
+                int row = -1;
+                int col = -1;
+                int row_ = -1;
+                int col_ = -1;
+                
+                for (int i = 0; i < ROWS; i++) {
+                    for (int j = 0; j < COLS; j++) { // finding the pawn's location in the board
+                        if (pawns[i][j] == label) {
+                            row = i;
+                            col = j;
+                        }
+                    }
+                }
+            
+
+                for (int i = 0; i < ROWS; i++) {
+                    for (int j = 0; j < COLS; j++) { // Finding the pawn's location in the board
+                        if (pawns[i][j] == oldLabel) {
+                            row_ = i;
+                            col_ = j;
+                        }
+                    }
+                }
+                  
+
+
+                if (board.getPiece(row_,col_).Attack(row, col, board).equals("attacker")){
+                    int x1 = oldLabel.getX(); // Getting the pawn's X position in pixels
+                    int y1 = oldLabel.getY(); // Getting the pawn's Y position in pixels
+    
+                    int x2 = label.getX(); // Getting the WhiteSpace's X position in pixels
+                    int y2 = label.getY(); // Getting the WhiteSpace's Y position in pixels
+    
+                    oldLabel.setLocation(x2, y2); // Changing the pawn's location
+                    label.setIcon(null); // Removing Icon
+                    label.setBackground(white); // Making it white
+                    label.setLocation(x1,y1); // Changing the WhiteSpace's location
+                    String tempflag = label.getName();
+                    label.setName("WhiteSpace");
+                    JLabel temp ;
+                    temp = pawns[row][col];
+                    pawns[row][col] = pawns[row_][col_];
+                    pawns[row_][col_] = temp;
+                    if(tempflag.contains("Flag")) {
+                        JOptionPane.showMessageDialog(null, "Blue Team Wins!");
+                        System.exit(0);
+                    }
+                    
+                    
+                }else{
+                    if(board.getPiece(row_,col_).getName() == board.getPiece(row, col).getName()){
+                        label.setIcon(null); // Removing Icon
+                        label.setBackground(white); // Making it white
+                        label.setName("WhiteSpace");
+                    }
+                
+                    
+                    oldLabel.setIcon(null); // Removing Icon
+                    oldLabel.setBackground(white); // Making it white
+                    oldLabel.setName("WhiteSpace");
+
+                    
+                }
+
+               
+                currentPlayer=teamRed;
+                
+            }
+
            
             
             int row = -1;
             int col = -1;
-            
+            //RETURNING TO ORIGINAL BACKGROUND COLOR
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if (pawns[i][j] == label){
@@ -307,15 +375,21 @@ public class BoardGraphics extends JPanel implements MouseListener {
                         col = j;
                     }
                     if(pawns[i][j].getBackground() == green) pawns[i][j].setBackground(white);
+                    if(pawns[i][j].getBackground() == orange) pawns[i][j].setBackground(red);
+                    if(pawns[i][j].getBackground() == purple) pawns[i][j].setBackground(blue);
                 }
             }
-            if(label.getName() != "WhiteSpace" && label.getBackground() == blue) {
+            if(label.getName() != "WhiteSpace" && label.getBackground() == blue && !(label.getName().contains("Flag") || label.getName().contains("Trap"))){
                 oldLabel = label;
                 if(row>0 && pawns[row-1][col].getBackground() != yellow && pawns[row-1][col].getName() == "WhiteSpace") { // if can move upwards
                     pawns[row-1][col].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = row-1;
-                        while (k>=0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow){
+                        while (k>=0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow  || pawns[k][col].getBackground() == red){
+                            if(pawns[k][col].getBackground() == red) {
+                                pawns[k][col].setBackground(orange);
+                                break;
+                            }   
                             pawns[k][col].setBackground(green);
                             k--;   
                         }
@@ -326,7 +400,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     pawns[row+1][col].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = row+1;
-                        while (k<7&& pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow ){
+                        while (k<7 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if(pawns[k][col].getBackground() == red) {
+                                pawns[k][col].setBackground(orange);
+                                break;
+                            }
                             pawns[k][col].setBackground(green);
                             k++;
                         }
@@ -340,7 +418,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     pawns[row][col-1].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = col-1;
-                        while (pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow && k>0){
+                        while (k>0 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if(pawns[row][k].getBackground() == red) {
+                                pawns[row][k].setBackground(orange);
+                                break;
+                            }
                             pawns[row][k].setBackground(green);
                             k--;
                         }
@@ -354,28 +436,87 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     pawns[row][col+1].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = col+1;
-                        while (pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow && k<9){
+                        while (k<9 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if (pawns[row][k].getBackground() == red) {
+                                pawns[row][k].setBackground(orange);
+                                break;
+                            }
+                            pawns[row][k].setBackground(green);
+                            k++;
+                        }
+                    }
+                }
+
+                if(row>0 && pawns[row-1][col].getBackground() != yellow && pawns[row-1][col].getBackground() == red) { // if can attack upwards
+                    pawns[row-1][col].setBackground(orange);
+                    if (label.getName().contains("Scout")){
+                        int k = row-1;
+                        while (k>=0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow  || pawns[k][col].getBackground() == red){
+                            if(pawns[k][col].getBackground() == red) {
+                                pawns[k][col].setBackground(orange);
+                                break;
+                            }   
+                            pawns[k][col].setBackground(green);
+                            k--;   
+                        }
+                    }
+                }
+
+                if(row<7 && pawns[row+1][col].getBackground()== red ) { //attacking square below
+                    pawns[row+1][col].setBackground(orange);
+                    if (label.getName().contains("Scout")){
+                        int k = row+1;
+                        while (k<7 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if(pawns[k][col].getBackground() == red) {
+                                pawns[k][col].setBackground(orange);
+                                break;
+                            }
+                            pawns[k][col].setBackground(green);
+                            k++;
+                        }
+                        
+                    }
+                }
+
+                if(col>0 && pawns[row][col-1].getBackground() == red ) { //checking square to the left
+                    pawns[row][col-1].setBackground(orange);
+                    if (label.getName().contains("Scout")){
+                        int k = col-1;
+                        while (k>0 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if(pawns[row][k].getBackground() == red) {
+                                pawns[row][k].setBackground(orange);
+                                break;
+                            }
+                            pawns[row][k].setBackground(green);
+                            k--;
+                        }
+                        
+                    }
+                }
+
+                if (col<9 && pawns[row][col+1].getBackground() == red) { //checking square to the right
+                    pawns[row][col+1].setBackground(orange);
+                    if (label.getName().contains("Scout")){
+                        int k = col+1;
+                        while (k<9 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[k][col].getBackground() == red){
+                            if (pawns[row][k].getBackground() == red) {
+                                pawns[row][k].setBackground(orange);
+                                break;
+                            }
                             pawns[row][k].setBackground(green);
                             k++;
                         }
                         
                     }
                 }
+
             }
             
         }
         if(currentPlayer == teamRed) {
-            // for(int i = 0; i<ROWS; i++) {
-            //     for (int j = 0; j < COLS; j++) {
-            //         if(pawns[i][j].getBackground() == blue) {
-            //             ImageIcon img = new ImageIcon(blueHiddenIcon);
-            //             Image image = img.getImage();
-            //             Image newImage = image.getScaledInstance(squareSize, squareSize, java.awt.Image.SCALE_SMOOTH);
-            //             img = new ImageIcon(newImage);
-            //             pawns[i][j].setIcon(img);
-            //         }
-            //     }
-            // }
+
+            
+            //MAKE ENEMY HIDDEN
             for(int i = 0; i<ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if(pawns[i][j].getBackground() == blue) {
@@ -390,6 +531,10 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     }
                 }
             }
+
+
+
+            //MAKE SELF VISIBLE
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if(pawns[i][j].getBackground() == red) {
@@ -402,6 +547,8 @@ public class BoardGraphics extends JPanel implements MouseListener {
                             split2[0] = "BeastRider"; 
                         }
                         String url = "images/RedPieces/"+split2[0]+ "R.png";
+                       
+            
                         ImageIcon randomImg= null;
                         try {
                             randomImg = new ImageIcon(ImageIO.read(getClass().getResource(url)).getScaledInstance(squareSize, squareSize, java.awt.Image.SCALE_SMOOTH));
@@ -413,6 +560,9 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     }
                 }
             }
+
+
+            //IF MOVE IS MADE
             if(label.getBackground() == green) {
             
                 int row = -1;
@@ -454,11 +604,84 @@ public class BoardGraphics extends JPanel implements MouseListener {
 
             }
 
+
+            if(label.getBackground() == purple) {
+               
+                int row = -1;
+                int col = -1;
+                int row_ = -1;
+                int col_ = -1;
+                
+                for (int i = 0; i < ROWS; i++) {
+                    for (int j = 0; j < COLS; j++) { // finding the pawn's location in the board
+                        if (pawns[i][j] == label) {
+                            row = i;
+                            col = j;
+                        }
+                    }
+                }
+            
+
+                for (int i = 0; i < ROWS; i++) {
+                    for (int j = 0; j < COLS; j++) { // Finding the pawn's location in the board
+                        if (pawns[i][j] == oldLabel) {
+                            row_ = i;
+                            col_ = j;
+                        }
+                    }
+                }
+               
+
+               
+                if (board.getPiece(row_,col_).Attack(row, col, board).equals("attacker")){
+                   
+                    int x1 = oldLabel.getX(); // Getting the pawn's X position in pixels
+                    int y1 = oldLabel.getY(); // Getting the pawn's Y position in pixels
+    
+                    int x2 = label.getX(); // Getting the WhiteSpace's X position in pixels
+                    int y2 = label.getY(); // Getting the WhiteSpace's Y position in pixels
+    
+                    oldLabel.setLocation(x2, y2); // Changing the pawn's location
+                    label.setIcon(null); // Removing Icon
+                    label.setBackground(white); // Making it white
+                    label.setLocation(x1,y1); // Changing the WhiteSpace's location
+                    String tempflag = label.getName();
+                    label.setName("WhiteSpace");
+                    JLabel temp ;
+                    temp = pawns[row][col];
+                    pawns[row][col] = pawns[row_][col_];
+                    pawns[row_][col_] = temp;
+                    if(tempflag.contains("Flag")) {
+                        JOptionPane.showMessageDialog(null, "Red Team Wins!");
+                        System.exit(0);
+                    }
+                    
+                }else{
+                    if(board.getPiece(row_,col_).getName() == board.getPiece(row, col).getName()){
+                        label.setIcon(null); // Removing Icon
+                        label.setBackground(white); // Making it white
+                        label.setName("WhiteSpace");
+                    }
+                  
+                    
+                    oldLabel.setIcon(null); // Removing Icon
+                    oldLabel.setBackground(white); // Making it white
+                    oldLabel.setName("WhiteSpace");
+
+                    
+                }
+
+               
+                currentPlayer=teamBlue;
+                
+            }
+
+
             
             
             int row = -1;
             int col = -1;
-            
+            //RETURNING TO ORIGINAL BACKGROUND COLOR
             for (int i = 0; i < ROWS; i++) {
                 for (int j = 0; j < COLS; j++) {
                     if (pawns[i][j] == label){
@@ -466,18 +689,24 @@ public class BoardGraphics extends JPanel implements MouseListener {
                         col = j;
                     }
                     if(pawns[i][j].getBackground() == green) pawns[i][j].setBackground(white);
+                    if(pawns[i][j].getBackground() == orange) pawns[i][j].setBackground(red);
+                    if(pawns[i][j].getBackground() == purple) pawns[i][j].setBackground(blue);
                 }
             }
-            if(label.getName() != "WhiteSpace" && label.getBackground() != yellow && label.getBackground() == red) {
+            if(label.getName() != "WhiteSpace" && label.getBackground() == red && !(label.getName().contains("Flag") || label.getName().contains("Trap"))) {
                 oldLabel = label;
                 if(row>0 && pawns[row-1][col].getBackground() != yellow && pawns[row-1][col].getName() == "WhiteSpace" ) { // if can move upwards
                     pawns[row-1][col].setBackground(green);
                     if (label.getName().contains("Scout")){
                         
                         int k = row-1;
-                        while (k >= 0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow ){
+                        while (k>=0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == blue){
+                            if (pawns[k][col].getBackground() == blue) {
+                                pawns[k][col].setBackground(purple);
+                                break;
+                            }
                             pawns[k][col].setBackground(green);
-                            k--;
+                            k--;   
                         }
                       
                     }
@@ -489,7 +718,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     pawns[row+1][col].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = row+1;
-                        while (k <= 7&& pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow){
+                        while (k<7 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == blue){
+                            if (pawns[k][col].getBackground() == blue) {
+                                pawns[k][col].setBackground(purple);
+                                break;
+                            }
                             pawns[k][col].setBackground(green);
                             k++;
                         }
@@ -504,7 +737,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     if (label.getName().contains("Scout")){
                         
                         int k = col-1;
-                        while (k >= 0 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow ){
+                        while (k>0 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[row][k].getBackground() == blue){
+                            if (pawns[row][k].getBackground() == blue) {
+                                pawns[row][k].setBackground(purple);
+                                break;
+                            }
                             pawns[row][k].setBackground(green);
                             k--;
                         }
@@ -518,7 +755,11 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     pawns[row][col+1].setBackground(green);
                     if (label.getName().contains("Scout")){
                         int k = col+1;
-                        while (k <= 9 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow ){
+                        while (k<9 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[row][k].getBackground() == blue){
+                            if (pawns[row][k].getBackground() == blue) {
+                                pawns[row][k].setBackground(purple);
+                                break;
+                            }
                             pawns[row][k].setBackground(green);
                             k++;
                         }
@@ -526,6 +767,70 @@ public class BoardGraphics extends JPanel implements MouseListener {
                     }
                 }
                 
+                
+
+                if(row>0 && pawns[row-1][col].getBackground() != yellow && pawns[row-1][col].getBackground() ==blue) { // if can attack upwards
+                    pawns[row-1][col].setBackground(purple);
+                    if (label.getName().contains("Scout")){
+                        int k = row-1;
+                        while (k>=0 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == blue){
+                            if (pawns[k][col].getBackground() == blue) {
+                                pawns[k][col].setBackground(purple);
+                                break;
+                            }
+                            pawns[k][col].setBackground(green);
+                            k--;   
+                        }
+                    }
+                }
+
+                if(row<7 && pawns[row+1][col].getBackground()==blue ) { //attacking square below
+                    pawns[row+1][col].setBackground(purple);
+                    if (label.getName().contains("Scout")){
+                        int k = row+1;
+                        while (k<7 && pawns[k][col].getName() == "WhiteSpace" && pawns[k][col].getBackground() != yellow || pawns[k][col].getBackground() == blue){
+                            if (pawns[k][col].getBackground() == blue) {
+                                pawns[k][col].setBackground(purple);
+                                break;
+                            }
+                            pawns[k][col].setBackground(green);
+                            k++;
+                        }
+                        
+                    }
+                }
+
+                if(col>0 && pawns[row][col-1].getBackground() ==blue ) { //checking square to the left
+                    pawns[row][col-1].setBackground(purple);
+                    if (label.getName().contains("Scout")){
+                        int k = col-1;
+                        while (k>0 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[row][k].getBackground() == blue){
+                            if (pawns[row][k].getBackground() == blue) {
+                                pawns[row][k].setBackground(purple);
+                                break;
+                            }
+                            pawns[row][k].setBackground(green);
+                            k--;
+                        }
+                        
+                    }
+                }
+
+                if (col<9 && pawns[row][col+1].getBackground() == blue) { //checking square to the right
+                    pawns[row][col+1].setBackground(purple);
+                    if (label.getName().contains("Scout")){
+                        int k = col+1;
+                        while (k<9 && pawns[row][k].getName() == "WhiteSpace" && pawns[row][k].getBackground() != yellow || pawns[row][k].getBackground() == blue){
+                            if (pawns[row][k].getBackground() == blue) {
+                                pawns[row][k].setBackground(purple);
+                                break;
+                            }
+                            pawns[row][k].setBackground(green);
+                            k++;
+                        }
+                        
+                    }
+                }
                 
                 
             }

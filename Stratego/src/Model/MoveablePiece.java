@@ -3,6 +3,7 @@ package Model;
 import java.awt.*;
 
 
+
 public abstract class MoveablePiece extends Piece{
     /**
      * Constructor for MoveablePiece
@@ -21,45 +22,17 @@ public abstract class MoveablePiece extends Piece{
     }
     @Override
     public String Attack(int x , int y, Board board) {
-        Whitespace whitespace = new Whitespace("WhiteSpace", this.getX(), this.getY(), team);
+        Whitespace whitespace = new Whitespace("WhiteSpace", this.getX(), this.getY());
         String winner = "none";
         if (board.getPiece(x,y) instanceof Whitespace){
+            board.addPiece(whitespace, this.getX(), this.getY());
             this.setX(x);
             this.setY(y);
             board.addPiece(this,x,y);
-            winner = "move";
-       } else if(board.getPiece(x,y).team != this.getTeam()){
             
-            if (this instanceof Slayer && board.getPiece(x,y) instanceof Dragon){
-                winner = this.getName();
-                this.setX(x);
-                this.setY(y);
-                board.addPiece(this,x,y);
-                winner = "attacker";
-            }else if(this instanceof Dwarf && board.getPiece(x,y) instanceof Trap) {
-                winner = this.getName();
-                this.setX(x);
-                this.setY(y);
-                board.addPiece(this,x,y);
-                winner ="attacker";
-            }
-            if(this.getPower() > board.getPiece(x,y).getPower()){
-                winner = this.getName();
-                this.setX(x);
-                this.setY(y);
-                board.addPiece(this,x,y);
-                winner ="attacker";
-
-            } else if (this.getPower() < board.getPiece(x,y).getPower()) {
-                winner = board.getPiece(x,y).getName();
-                board.addPiece(whitespace,this.getX(),this.getY());
-                winner = "defender";
-            } else if (this.getPower() == board.getPiece(x,y).getPower()) {
-                winner = "none";
-                board.addPiece(whitespace,x,y);
-                board.addPiece(whitespace,this.getX(),this.getY());
-                winner = "none";
-            } else if (board.getPiece(x, y)instanceof Flag){
+            winner = "attacker";
+       } else if(board.getPiece(x,y).team != this.getTeam()){
+            if (board.getPiece(x, y)instanceof Flag){
                 winner = "attacker";
                 this.setX(x);
                 this.setY(y);
@@ -70,7 +43,37 @@ public abstract class MoveablePiece extends Piece{
                 } else {
                     System.out.println("Red team is victorious");
                 }
-            }
+            }else if (this instanceof Slayer && board.getPiece(x,y) instanceof Dragon){
+                winner = this.getName();
+                board.addPiece(whitespace, this.getX(), this.getY());
+                this.setX(x);
+                this.setY(y);
+                board.addPiece(this,x,y);
+                winner = "attacker";
+            }else if(this instanceof Dwarf && board.getPiece(x,y) instanceof Trap) {
+                winner = this.getName();
+                this.setX(x);
+                this.setY(y);
+                board.addPiece(this,x,y);
+                winner ="attacker";
+            }else if(this.getPower() > board.getPiece(x,y).getPower()){
+                winner = this.getName();
+                this.setX(x);
+                this.setY(y);
+                board.addPiece(this,x,y);
+                winner ="attacker";
+
+            }else if (this.getPower() < board.getPiece(x,y).getPower()) {
+                winner = board.getPiece(x,y).getName();
+                board.addPiece(whitespace,this.getX(),this.getY());
+                winner = "defender";
+            }else if (this.getPower() == board.getPiece(x,y).getPower()) {
+                winner = "none";
+                board.addPiece(whitespace,x,y);
+                board.addPiece(whitespace,this.getX(),this.getY());
+                winner = "none";
+            } 
+        
        }
        return winner;
     }

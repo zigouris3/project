@@ -105,7 +105,7 @@ public class Board{
                     }
                 }
                 else {
-                    Whitespace whitespace = new Whitespace(name[0], i, j, boardGraphics.pawns[i][j].getBackground());
+                    Whitespace whitespace = new Whitespace(name[0], i, j);
                     addPiece(whitespace, i, j);
                 }
             }
